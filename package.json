@@ -47,5 +47,17 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "sonarqube-scanner": "^3.3.0"
+  },
+  "jest": {
+      "verbose": true,
+      "projects": [
+          "./jest.backend.config.js",
+          "./jest.frontend.config.js"
+      ],
+      "coverageDirectory": "./coverage",
+      "coverageReporters": [
+          "text",
+          "lcov"
+      ]
   }
 }
