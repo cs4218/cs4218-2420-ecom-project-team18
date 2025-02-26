@@ -121,6 +121,7 @@ const UpdateProduct = () => {
                   setCategory(value);
                 }}
                 value={category}
+                data-testid="selectCategory"
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -209,6 +210,7 @@ const UpdateProduct = () => {
                     setShipping(value);
                   }}
                   value={shipping ? "yes" : "No"}
+                  data-testid="selectShipping"
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>

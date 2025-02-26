@@ -72,6 +72,7 @@ const AdminOrders = () => {
                           bordered={false}
                           onChange={(value) => handleChange(o._id, value)}
                           defaultValue={o?.status}
+                          data-testid="selectElement"
                         >
                           {status.map((s, i) => (
                             <Option key={i} value={s}>

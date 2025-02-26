@@ -81,6 +81,7 @@ const CreateProduct = () => {
                 onChange={(value) => {
                   setCategory(value);
                 }}
+                data-testid="selectCategory"
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -97,6 +98,7 @@ const CreateProduct = () => {
                     accept="image/*"
                     onChange={(e) => setPhoto(e.target.files[0])}
                     hidden
+                    data-testid="uploadPhoto"
                   />
                 </label>
               </div>
@@ -159,6 +161,7 @@ const CreateProduct = () => {
                   onChange={(value) => {
                     setShipping(value);
                   }}
+                  data-testid="selectShipping"
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>
