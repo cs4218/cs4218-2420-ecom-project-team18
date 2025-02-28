@@ -224,4 +224,156 @@ it("Error when Create product", async () => {
 
 })
 
+it("Should not allow creation of quantity and price of negative values", async () => {
+  axios.post.mockRejectedValue({
+      data: {
+        success: false,
+        message: "Quantity and Price should not be negative",
+      },
+    });     
+    
+
+  const { getByRole, getByPlaceholderText, getByTestId, getByText} = render(
+    <MemoryRouter initialEntries={["/create-product"]}>
+      <Routes>
+        <Route path="/create-product" element={<CreateProduct />} />
+      </Routes>
+    </MemoryRouter>
+  );    
+
+  await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        "/api/v1/category/get-category"
+      );
+    });    
+
+  const createMockFile = (name, size, type) => {
+      const padding = new Blob([new Array(size).fill("-").join("")], { type });
+      return new File([padding], name, { type });
+  };
+
+  const selectCategory = getByTestId(`selectCategory`);
+  
+  fireEvent.change(selectCategory, { target: { value: "pen" } });
+
+  fireEvent.change(getByPlaceholderText("write a name"), {
+        target: { value: "test product" },
+  });
+
+  fireEvent.change(getByPlaceholderText("write a description"), {
+      target: { value: "test product description" },
+});
+
+  fireEvent.change(getByPlaceholderText("write a Price"), {
+      target: { value: "-1" },
+  });
+
+  fireEvent.change(getByPlaceholderText("write a quantity"), {
+      target: { value: "-1" },
+  });
+
+  const selectShipping = getByTestId(`selectShipping`);
+  
+  fireEvent.change(selectShipping, { target: { value: "Yes" } });
+
+  const file = createMockFile("test-img.jpg", 350, "image/jpeg");
+  const input = getByText(/upload photo/i);
+  fireEvent.input(input, { target: { files: [file] } });
+  await waitFor(() => expect(input.files.length).toBe(1));
+  expect(input.files[0].name).toBe("test-img.jpg");
+  fireEvent.click(getByRole("button", { name: /create product/i }));
+
+  await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/product/create-product",
+        expect.any(FormData)
+      );
+    });
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "Quantity and Price should not be negative"
+      );
+    });
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      "/dashboard/admin/products"
+    );
+
+})
+
+it("Should allow the creation of quantity and price of 0 value", async () => {
+  axios.post.mockResolvedValue({
+      data: {
+        success: true,
+        message: "Product Created Successfully",
+      },
+    });     
+    
+
+  const { getByRole, getByPlaceholderText, getByTestId, getByText} = render(
+    <MemoryRouter initialEntries={["/create-product"]}>
+      <Routes>
+        <Route path="/create-product" element={<CreateProduct />} />
+      </Routes>
+    </MemoryRouter>
+  );    
+
+  await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        "/api/v1/category/get-category"
+      );
+    });    
+
+  const createMockFile = (name, size, type) => {
+      const padding = new Blob([new Array(size).fill("-").join("")], { type });
+      return new File([padding], name, { type });
+  };
+
+  const selectCategory = getByTestId(`selectCategory`);
+  
+  fireEvent.change(selectCategory, { target: { value: "pen" } });
+
+  fireEvent.change(getByPlaceholderText("write a name"), {
+        target: { value: "test product" },
+  });
+
+  fireEvent.change(getByPlaceholderText("write a description"), {
+      target: { value: "test product description" },
+});
+
+  fireEvent.change(getByPlaceholderText("write a Price"), {
+      target: { value: "0" },
+  });
+
+  fireEvent.change(getByPlaceholderText("write a quantity"), {
+      target: { value: "0" },
+  });
+
+  const selectShipping = getByTestId(`selectShipping`);
+  
+  fireEvent.change(selectShipping, { target: { value: "Yes" } });
+
+  const file = createMockFile("test-img.jpg", 350, "image/jpeg");
+  const input = getByText(/upload photo/i);
+  fireEvent.input(input, { target: { files: [file] } });
+  await waitFor(() => expect(input.files.length).toBe(1));
+  expect(input.files[0].name).toBe("test-img.jpg");
+  fireEvent.click(getByRole("button", { name: /create product/i }));
+
+  await waitFor(() => {
+      expect(axios.post).toHaveBeenCalledWith(
+        "/api/v1/product/create-product",
+        expect.any(FormData)
+      );
+    });
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith(
+        "Product Created Successfully"
+      );
+    });
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/dashboard/admin/products"
+    );
+
+})
+
 });
