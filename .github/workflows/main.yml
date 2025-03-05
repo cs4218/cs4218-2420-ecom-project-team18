@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # Allows running manually from GitHub Actions
 
 jobs:
   frontend-tests:
