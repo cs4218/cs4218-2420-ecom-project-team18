@@ -56,7 +56,7 @@ export const registerController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Errro in Registeration",
+      message: "Error in Registration",
       error,
     });
   }
@@ -121,13 +121,13 @@ export const forgotPasswordController = async (req, res) => {
   try {
     const { email, answer, newPassword } = req.body;
     if (!email) {
-      res.status(400).send({ message: "Emai is required" });
+      return res.status(400).send({ message: "Emai is required" });
     }
     if (!answer) {
-      res.status(400).send({ message: "answer is required" });
+      return res.status(400).send({ message: "answer is required" });
     }
     if (!newPassword) {
-      res.status(400).send({ message: "New Password is required" });
+      return res.status(400).send({ message: "New Password is required" });
     }
     //check
     const user = await userModel.findOne({ email, answer });
