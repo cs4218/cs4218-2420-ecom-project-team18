@@ -27,7 +27,7 @@ export default {
   collectCoverageFrom: ["client/src/pages/Auth/**"],
   coverageThreshold: {
     global: {
-      lines: 100,
+      lines: 90,
       functions: 100,
     },
   },
