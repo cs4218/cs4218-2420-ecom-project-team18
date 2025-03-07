@@ -39,6 +39,9 @@ const CreateProduct = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
+      if (quantity < 0 || price < 0) {
+        toast.error("Quantity and Price should not be negative");
+      }
       const productData = new FormData();
       productData.append("name", name);
       productData.append("description", description);
@@ -46,15 +49,15 @@ const CreateProduct = () => {
       productData.append("quantity", quantity);
       productData.append("photo", photo);
       productData.append("category", category);
-      const { data } = axios.post(
+      const { data } = await axios.post(
         "/api/v1/product/create-product",
         productData
       );
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
         toast.success("Product Created Successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);   
       }
     } catch (error) {
       console.log(error);

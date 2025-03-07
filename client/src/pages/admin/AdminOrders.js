@@ -40,6 +40,7 @@ const AdminOrders = () => {
       getOrders();
     } catch (error) {
       console.log(error);
+      toast.error("Failed to update order status")
     }
   };
   return (

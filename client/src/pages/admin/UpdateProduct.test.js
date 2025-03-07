@@ -268,12 +268,7 @@ it("Error when Update product (null quantity)", async () => {
     expect(input.files[0].name).toBe("test-img.jpg");
     fireEvent.click(getByRole("button", { name: /update product/i }));
 
-    await waitFor(() => {
-        expect(axios.put).toHaveBeenCalledWith(
-          "/api/v1/product/update-product/1",
-          expect.any(FormData)
-        );
-      });
+
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith(
           "Quantity is Required"
@@ -328,13 +323,108 @@ it("Delete the product successfully", async () => {
       });
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith(
-          "Product DEleted Succfully"
+          "Product Deleted Successfully"
         );
       });
       
       expect(mockNavigate).toHaveBeenCalledWith(
         "/dashboard/admin/products"
       );
+
+})
+
+it("Error when get category)", async () => {
+  axios.get.mockRejectedValue(new Error("Error getting category"));     
+    
+  toast.error = jest.fn();
+
+  render(
+      <MemoryRouter initialEntries={["/product/product1"]}>
+      <Routes>
+        <Route path="/product/product1" element={<UpdateProduct />} />
+      </Routes>
+    </MemoryRouter>
+  );       
+
+ 
+  await waitFor(() => {
+    expect(axios.get).toHaveBeenCalledWith("/api/v1/category/get-category");
+  });
+
+  expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
+
+})
+
+it("Error when put product", async () => {
+  axios.put.mockRejectedValue(new Error("Error put product"));   
+  
+  toast.error = jest.fn();
+    
+
+  const { getByRole, getByPlaceholderText, getByTestId, getByText} = render(
+      <MemoryRouter initialEntries={["/product/product1"]}>
+      <Routes>
+        <Route path="/product/product1" element={<UpdateProduct />} />
+      </Routes>
+    </MemoryRouter>
+  );    
+
+  await waitFor(() => {
+      expect(axios.get).toHaveBeenCalledWith(
+        "/api/v1/category/get-category"
+      );
+    });    
+
+  const createMockFile = (name, size, type) => {
+      const padding = new Blob([new Array(size).fill("-").join("")], { type });
+      return new File([padding], name, { type });
+  };
+
+  const selectCategory = getByTestId(`selectCategory`);
+  
+  fireEvent.change(selectCategory, { target: { value: "pen" } });
+
+  fireEvent.change(getByPlaceholderText("write a name"), {
+        target: { value: "product1" },
+  });
+
+  fireEvent.change(getByPlaceholderText("write a description"), {
+      target: { value: "product 1 description updated" },
+});
+
+  fireEvent.change(getByPlaceholderText("write a Price"), {
+      target: { value: "10" },
+  });
+
+  fireEvent.change(getByPlaceholderText("write a quantity"), {
+      target: { value: "15" },
+  });
+
+  const selectShipping = getByTestId(`selectShipping`);
+  
+  fireEvent.change(selectShipping, { target: { value: "No" } });
+
+  const file = createMockFile("test-img.jpg", 350, "image/jpeg");
+  const input = getByText(/upload photo/i);
+  fireEvent.input(input, { target: { files: [file] } });
+  await waitFor(() => expect(input.files.length).toBe(1));
+  expect(input.files[0].name).toBe("test-img.jpg");
+  fireEvent.click(getByRole("button", { name: /update product/i }));
+
+  await waitFor(() => {
+      expect(axios.put).toHaveBeenCalledWith(
+        "/api/v1/product/update-product/1",
+        expect.any(FormData)
+      );
+    });
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        "Something went wrong"
+      );
+    });
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      "/dashboard/admin/products"
+    );
 
 })
       

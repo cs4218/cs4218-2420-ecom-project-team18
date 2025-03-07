@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">29.54% </span>
+                <span class="strong">31.06% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>39/132</span>
+                <span class='fraction'>41/132</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.75% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>6/32</span>
+                <span class='fraction'>12/36</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">30% </span>
+                <span class="strong">31.53% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>39/130</span>
+                <span class='fraction'>41/130</span>
             </div>
         
             
@@ -474,20 +474,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -601,24 +601,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -849,8 +849,8 @@ export const createProductController = async (req, res) =&gt; {
 <span class="cstat-no" title="statement not covered" >        return res.status(500).send({ error: "Price is Required" });</span>
 <span class="branch-3 cbranch-no" title="branch not covered" >      case !category:</span>
 <span class="cstat-no" title="statement not covered" >        return res.status(500).send({ error: "Category is Required" });</span>
-<span class="branch-4 cbranch-no" title="branch not covered" >      case !quantity:</span>
-<span class="cstat-no" title="statement not covered" >        return res.status(500).send({ error: "Quantity is Required" });</span>
+      case !quantity || quantity &lt; 0:
+        return res.status(500).send({ error: "Quantity is Required" });
 <span class="branch-5 cbranch-no" title="branch not covered" >      case photo &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >photo.size &gt; 1000000:</span></span>
 <span class="cstat-no" title="statement not covered" >        return res</span>
           .status(500)
@@ -976,8 +976,8 @@ export const updateProductController = async (req, res) =&gt; {
 <span class="cstat-no" title="statement not covered" >        return res.status(500).send({ error: "Price is Required" });</span>
 <span class="branch-3 cbranch-no" title="branch not covered" >      case !category:</span>
 <span class="cstat-no" title="statement not covered" >        return res.status(500).send({ error: "Category is Required" });</span>
-<span class="branch-4 cbranch-no" title="branch not covered" >      case !quantity:</span>
-<span class="cstat-no" title="statement not covered" >        return res.status(500).send({ error: "Quantity is Required" });</span>
+      case !quantity || quantity &lt; 0:
+        return res.status(500).send({ error: "Quantity is Required" });
 <span class="branch-5 cbranch-no" title="branch not covered" >      case photo &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >photo.size &gt; 1000000:</span></span>
 <span class="cstat-no" title="statement not covered" >        return res</span>
           .status(500)
@@ -1198,7 +1198,7 @@ export const brainTreePaymentController = <span class="fstat-no" title="function
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-02-28T04:02:56.728Z
+                at 2025-03-07T09:40:39.789Z
             </div>
         <script src="../prettify.js"></script>
         <script>
