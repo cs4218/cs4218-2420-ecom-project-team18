@@ -8,17 +8,19 @@ import mongoose from "mongoose";
 
 jest.mock("../models/productModel.js");
 
-jest.mock("braintree", () => {
+jest.mock('braintree', () => {
   return {
-    BraintreeGateway: jest.fn().mockImplementation(() => {
-      return {
-        transaction: {
-          sale: jest.fn().mockResolvedValue({ success: true }),
-        },
-      };
-    }),
+    BraintreeGateway: jest.fn().mockImplementation(() => ({
+      transaction: {
+        sale: jest.fn().mockResolvedValue({ success: true }),
+      },
+    })),
+    Environment: {
+      Sandbox: 'sandbox',
+    },
   };
 });
+
 
 describe("Create Product Controller Test", () => {
   let req, res;
