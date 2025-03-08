@@ -5,7 +5,11 @@ import {
     updateProductController,
     getProductController,
     getSingleProductController,
-    productPhotoController } from "./productController";
+    productPhotoController,
+    productFiltersController,
+    productCountController,
+    productListController,
+    searchProductController } from "./productController";
 import productModel from "../models/productModel";
 import mongoose from "mongoose";
 
@@ -352,7 +356,7 @@ describe("Create Product Controller Test", () => {
 
 });
 
-describe("Get Product Controller Test", () => {
+describe("Product/Single Product/Photo Controller Test", () => {
     let req, res;
   
     beforeEach(() => {
@@ -594,14 +598,351 @@ describe("Get Product Controller Test", () => {
             error: error,  // Ensure the message is sent and not the whole error object
         });
     });
+
+});
+
+describe("Product Filters Controller Tests", () => {
+    let req, res;
+
+    beforeEach(() => {
+        req = { body: {} };
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+    });
+
+    test("should filter products based on checked and radio filters", async () => {
+        const mockProducts = [{ name: "Product1" }, { name: "Product2" }];
+        const checked = ["category1", "category2"];
+        const radio = [10, 100];
+
+        req.body = { checked, radio };
+
+        // Mock the productModel.find to return mock products
+        productModel.find = jest.fn().mockResolvedValue(mockProducts);
+
+        await productFiltersController(req, res);
+
+        expect(productModel.find).toHaveBeenCalledWith({
+            category: checked,
+            price: { $gte: radio[0], $lte: radio[1] },
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            products: mockProducts,
+        });
+    });
+
+    test("should filter products based on checked filter only", async () => {
+        const mockProducts = [{ name: "Product1" }];
+        const checked = ["category1", "category2"];
+
+        req.body = { checked, radio: [] }; // No radio filter
+
+        // Mock the productModel.find to return mock products
+        productModel.find = jest.fn().mockResolvedValue(mockProducts);
+
+        await productFiltersController(req, res);
+
+        expect(productModel.find).toHaveBeenCalledWith({ category: checked });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            products: mockProducts,
+        });
+    });
+
+    test("should filter products based on radio filter only", async () => {
+        const mockProducts = [{ name: "Product1" }];
+        const radio = [10, 100];
+
+        req.body = { checked: [], radio }; // No checked filter
+
+        // Mock the productModel.find to return mock products
+        productModel.find = jest.fn().mockResolvedValue(mockProducts);
+
+        await productFiltersController(req, res);
+
+        expect(productModel.find).toHaveBeenCalledWith({
+            price: { $gte: radio[0], $lte: radio[1] },
+        });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            products: mockProducts,
+        });
+    });
+
+    test("should return all products when no filters are provided", async () => {
+        const mockProducts = [{ name: "Product1" }, { name: "Product2" }];
+
+        req.body = { checked: [], radio: [] }; // No filters
+
+        // Mock the productModel.find to return mock products
+        productModel.find = jest.fn().mockResolvedValue(mockProducts);
+
+        await productFiltersController(req, res);
+
+        expect(productModel.find).toHaveBeenCalledWith({});
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+            success: true,
+            products: mockProducts,
+        });
+    });
+
+    test("should handle error while getting filtered products", async () => {
+        const errorMessage = "Error while fetching products";
+        const error = new Error(errorMessage);
+        req.body = { checked: ["category1"], radio: [10, 100] };
+
+        // Mock the productModel.find to throw an error
+        productModel.find = jest.fn().mockRejectedValue(new Error(errorMessage));
+
+        await productFiltersController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Error WHile Filtering Products",
+            error: error,
+        });
+    });
+
+});
+
+describe("Product Count Controller Tests", () => {
+    let req, res;
+  
+    beforeEach(() => {
+      req = {};
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+    });
+  
+    test("should return the correct product count", async () => {
+      const mockTotal = 100; // Mock total count
+      // Mock the productModel.estimatedDocumentCount to return the mock total
+      productModel.find = jest.fn().mockReturnThis();
+      productModel.estimatedDocumentCount = jest.fn().mockResolvedValue(mockTotal);
+  
+      await productCountController(req, res);
+  
+      expect(productModel.estimatedDocumentCount).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        total: mockTotal,
+      });
+    });
+
+    test("should handle error while retrieving product count", async () => {
+        const errorMessage = "Error while fetching product count";
+        const error = new Error(errorMessage);
+        // Mock the productModel.estimatedDocumentCount to throw an error
+        productModel.find = jest.fn().mockReturnThis();
+        productModel.estimatedDocumentCount = jest.fn().mockRejectedValue(new Error(errorMessage));
     
+        await productCountController(req, res);
     
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          message: "Error in product count",
+          error: error,
+          success: false,
+        });
+      });
+
+});
+
+describe("productListController", () => {
+    let req, res;
+  
+    beforeEach(() => {
+      req = {
+        params: {},
+      };
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+    });
+  
+    test("should return products with pagination", async () => {
+      const mockProducts = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Product 1",
+          description: "Description 1",
+          price: 100,
+          quantity: 10,
+          category: "Category 1",
+          shipping: true,
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Product 2",
+          description: "Description 2",
+          price: 200,
+          quantity: 20,
+          category: "Category 2",
+          shipping: true,
+        },
+      ]; // Mock product data
+      const page = 1;
+      const perPage = 6;
+  
+      // Mock the query chain for productModel
+      productModel.find = jest.fn().mockReturnThis();
+      productModel.select = jest.fn().mockReturnThis();
+      productModel.skip = jest.fn().mockReturnThis();
+      productModel.limit = jest.fn().mockReturnThis();
+      productModel.sort = jest.fn().mockResolvedValue(mockProducts);
+  
+      // Set the request params with the page number
+      req.params.page = page;
+  
+      await productListController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({});
+      expect(productModel.skip).toHaveBeenCalledWith((page - 1) * perPage); // Check if skip is called correctly
+      expect(productModel.limit).toHaveBeenCalledWith(perPage); // Check if limit is called correctly
+      expect(productModel.sort).toHaveBeenCalledWith({ createdAt: -1 });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        products: mockProducts,
+      });
+    });
+
+    test("should handle error during product list retrieval", async () => {
+        const errorMessage = "Error fetching product list";
+        const error = new Error(errorMessage);
+        // Mock the query chain to throw an error
+        productModel.find = jest.fn().mockReturnThis();
+        productModel.select = jest.fn().mockReturnThis();
+        productModel.skip = jest.fn().mockReturnThis();
+        productModel.limit = jest.fn().mockReturnThis();
+        productModel.sort = jest.fn().mockRejectedValue(new Error(errorMessage));
     
-      
-      
-      
-      
-      
+        await productListController(req, res);
     
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          success: false,
+          message: "error in per page ctrl",
+          error: error,
+        });
+      });
+
+});
+
+describe("Search Product Controller Tests", () => {
+    let req, res;
+  
+    beforeEach(() => {
+      req = {
+        params: {},
+      };
+      res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+        send: jest.fn(),
+      };
+    });
+  
+    test("should return products that match the search keyword", async () => {
+      const keyword = "product";
+      const mockProducts = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Product 1",
+          description: "Description of product 1",
+          price: 100,
+          quantity: 10,
+          category: "Category 1",
+          shipping: true,
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Another Product",
+          description: "Description of another product",
+          price: 150,
+          quantity: 20,
+          category: "Category 2",
+          shipping: true,
+        },
+      ]; // Mock product data
+  
+      // Mock the query to return matching products
+      productModel.find = jest.fn().mockReturnThis();
+      productModel.select = jest.fn().mockResolvedValue(mockProducts);
+  
+      // Set the request params with the keyword
+      req.params.keyword = keyword;
+  
+      await searchProductController(req, res);
+  
+      expect(productModel.find).toHaveBeenCalledWith({
+        $or: [
+          { name: { $regex: keyword, $options: "i" } },
+          { description: { $regex: keyword, $options: "i" } },
+        ],
+      });
+      expect(res.json).toHaveBeenCalledWith(mockProducts);
+    });
+
+    test("should return an empty array if no products match the search keyword", async () => {
+        const keyword = "nonexistentProduct";
+        const mockProducts = []; // No matching products
+    
+        // Mock the query to return no products
+        productModel.find = jest.fn().mockReturnThis();
+        productModel.select = jest.fn().mockResolvedValue(mockProducts);
+    
+        // Set the request params with the keyword
+        req.params.keyword = keyword;
+    
+        await searchProductController(req, res);
+    
+        expect(productModel.find).toHaveBeenCalledWith({
+          $or: [
+            { name: { $regex: keyword, $options: "i" } },
+            { description: { $regex: keyword, $options: "i" } },
+          ],
+        });
+        expect(res.json).toHaveBeenCalledWith(mockProducts);
+      });
+
+      test("should handle error during search", async () => {
+        const errorMessage = "Database error";
+        const error = new Error(errorMessage);
+        // Mock `find` to return an object that supports chaining with `select`
+        const mockQuery = { select: jest.fn().mockReturnThis() }; 
+        productModel.find = jest.fn().mockReturnValue(mockQuery); // Return the query object with select
+        
+        // Mock the `find` to reject with an error
+        mockQuery.select.mockRejectedValue(new Error(errorMessage));
+      
+        // Set the request params with the keyword
+        req.params.keyword = "product";
+      
+        await searchProductController(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          success: false,
+          message: "Error In Search Product API",
+          error: error,
+        });
+      });
+      
+      
+
+      
 
 });
