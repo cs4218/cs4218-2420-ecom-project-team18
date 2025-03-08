@@ -9,7 +9,8 @@ import {
     productFiltersController,
     productCountController,
     productListController,
-    searchProductController } from "./productController";
+    searchProductController,
+    realtedProductController } from "./productController";
 import productModel from "../models/productModel";
 import mongoose from "mongoose";
 
@@ -941,8 +942,119 @@ describe("Search Product Controller Tests", () => {
         });
       });
       
-      
+});
 
+describe("Related Product Controller Tests", () => {
+    let req, res;
+
+    beforeEach(() => {
+        req = {
+          params: {},
+        };
+        res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+          send: jest.fn(),
+        };
+      });
+
+    test("should return related products", async () => {
+        const mockProducts = [
+          {
+            _id: new mongoose.Types.ObjectId(),
+            name: "Product 2",
+            description: "Description of product 2",
+            price: 200,
+            quantity: 10,
+            category: "categoryId",
+            shipping: true,
+          },
+          {
+            _id: new mongoose.Types.ObjectId(),
+            name: "Product 3",
+            description: "Description of product 3",
+            price: 300,
+            quantity: 20,
+            category: "categoryId",
+            shipping: true,
+          },
+          {
+            _id: new mongoose.Types.ObjectId(),
+            name: "Product 4",
+            description: "Description of product 4",
+            price: 150,
+            quantity: 15,
+            category: "categoryId",
+            shipping: true,
+          },
+        ]; // Mock products to return
+                
+        const mockQuery = {
+          select: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          populate: jest.fn().mockResolvedValue(mockProducts)
+        };
+      
+        // Mock `find` to return the query object
+        productModel.find = jest.fn().mockReturnValue(mockQuery);
+      
+        // Set up the request parameters
+        req.params.pid = "productId"; // The current product ID
+        req.params.cid = "categoryId"; // The category ID
+      
+        await realtedProductController(req, res);
+      
+        expect(productModel.find).toHaveBeenCalledWith({
+          category: "categoryId",
+          _id: { $ne: "productId" },
+        });
+      
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+          success: true,
+          products: mockProducts,
+        });
+      });
+
+      test("should handle database error", async () => {
+        const errorMessage = "Database error";
+        const error = new Error(errorMessage);
+        // Mock the find method on productModel
+        const mockQuery = [
+            { productId: 1, productName: 'Test Product 1', price: 100, category: 'Test Category 1' },
+            { productId: 2, productName: 'Test Product 2', price: 150, category: 'Test Category 2' },
+            { productId: 3, productName: 'Test Product 3', price: 200, category: 'Test Category 3' }
+        ];
+        productModel.find = jest.fn().mockResolvedValue({
+            select: jest.fn().mockReturnThis(), // Mock .select()
+            limit: jest.fn().mockReturnThis(),  // Mock .limit()
+            populate: jest.fn().mockReturnThis(mockQuery), // Mock .populate()
+            
+        });
+
+
+      
+        // Set up the request parameters
+        req.params.pid = "productId"; // The current product ID
+        req.params.cid = "categoryId"; // The category ID
+      
+        await realtedProductController(req, res);
+      
+        // Ensure `find` was called with the correct parameters
+        expect(productModel.find).toHaveBeenCalledWith({
+          category: "categoryId",
+          _id: { $ne: "productId" },
+        });
+      
+        // Check that the response has a failure status and the correct message
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          success: false,
+          message: "error while getting related product",
+          error: error
+        });
+      });
+      
       
 
 });
