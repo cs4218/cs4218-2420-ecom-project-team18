@@ -3,7 +3,8 @@ import {
     createProductController, 
     deleteProductController,
     updateProductController,
-    getProductController } from "./productController";
+    getProductController,
+    getSingleProductController } from "./productController";
 import productModel from "../models/productModel";
 import mongoose from "mongoose";
 
@@ -451,6 +452,81 @@ describe("Get Product Controller Test", () => {
           })
         );
       });
+
+      test("successful retrieval of a single product", async () => {
+        const findOne = jest.spyOn(productModel, "findOne");
+        const slug = "test-product";
+        const mockProduct = {
+          _id: new mongoose.Types.ObjectId(),
+          name: "Test Product",
+          description: "Test description",
+          price: 100,
+          quantity: 5,
+          category: "123",
+          shipping: true,
+          slug: slug,
+        };
+      
+        req = { params: { slug } };
+      
+        findOne.mockImplementation(() => ({
+          select: jest.fn().mockReturnThis(),
+          populate: jest.fn().mockResolvedValue(mockProduct),
+        }));
+      
+        await getSingleProductController(req, res);
+      
+        // Assertions
+        expect(productModel.findOne).toHaveBeenCalledWith({ slug });
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: true,
+            message: "Single Product Fetched",
+            product: expect.objectContaining({
+              _id: mockProduct._id,
+              name: "Test Product",
+              description: "Test description",
+              price: 100,
+              quantity: 5,
+              category: "123",
+              shipping: true,
+              slug: slug,
+            }),
+          })
+        );
+      });
+
+      test("handles error while getting a single product", async () => {
+        const findOne = jest.spyOn(productModel, "findOne");
+        const slug = "non-existent-product";
+      
+        // Mock an error throw
+        findOne.mockImplementation(() => {
+          throw new Error("Product not found");
+        });
+      
+        req = { params: { slug } };
+      
+        // Call the controller
+        await getSingleProductController(req, res);
+      
+        // Assertions
+        expect(productModel.findOne).toHaveBeenCalledWith({ slug });
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "Eror while getitng single product",
+            error: expect.objectContaining({
+              message: "Product not found",  // Expecting the full Error object
+            }),
+          })
+        );
+      });
+      
+      
+      
     
 
 });
