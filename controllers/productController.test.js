@@ -348,3 +348,89 @@ describe("Create Product Controller Test", () => {
   });
 
 })
+
+describe("Create Product Controller Test", () => {
+    let req, res;
+  
+    beforeEach(() => {
+      jest.clearAllMocks();
+      req = {
+        fields: {
+          name: 'product',
+          description: 'product description',
+          price: "100",
+          category: "123",
+          quantity: "10",
+          shipping: true,
+        },
+  
+        files: {
+          photo: null,
+        },
+        
+      };
+  
+      res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+      };
+    });
+
+    test("successful retrieval of all products", async () => {
+        // Mock productModel.find() to return a chainable query object
+        const find = jest.spyOn(productModel, "find");
+      
+        const pid = new mongoose.Types.ObjectId();
+      
+        // Setup the req object for retrieving all products
+        req = {
+          params: {},
+          query: {},
+        };
+      
+        // Mock the full chain of methods (.populate, .select, .exec)
+        find.mockImplementation(() => ({
+          populate: jest.fn().mockReturnThis(),  // Mock populate to return the same query
+          select: jest.fn().mockReturnThis(),    // Mock select to return the same query
+          exec: jest.fn().mockResolvedValue([
+            {
+              _id: pid,
+              name: "product",
+              description: "product description",
+              price: "100",
+              quantity: "10",
+              category: "123",
+              shipping: true,
+            },
+          ]),
+        }));
+      
+        // Initialize res object
+        res = {
+          status: jest.fn().mockReturnThis(),
+          send: jest.fn(),
+        };
+      
+        // Simulate the call to the getProductController
+        await getProductController(req, res);
+      
+        // Assertions
+        expect(productModel.find).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+          success: true,
+          message: "Products retrieved successfully",
+          products: expect.arrayContaining([
+            expect.objectContaining({
+              name: "product",
+              description: "product description",
+              price: "100",
+              quantity: "10",
+              shipping: true,
+              category: "123",
+            }),
+          ]),
+        });
+      });
+
+})
