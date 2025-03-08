@@ -4,7 +4,8 @@ import {
     deleteProductController,
     updateProductController,
     getProductController,
-    getSingleProductController } from "./productController";
+    getSingleProductController,
+    productPhotoController } from "./productController";
 import productModel from "../models/productModel";
 import mongoose from "mongoose";
 
@@ -524,6 +525,80 @@ describe("Get Product Controller Test", () => {
           })
         );
       });
+
+      test("successful retrieval of product photo", async () => {
+        const findById = jest.spyOn(productModel, "findById");
+        const pid = new mongoose.Types.ObjectId();
+      
+        // Mock the case where the product is found and has a photo
+        const mockProduct = {
+          _id: pid,
+          photo: {
+            data: Buffer.from("some photo data"),
+            contentType: "image/jpeg"
+          }
+        };
+      
+        // Mock the query chain
+        findById.mockReturnValue({
+          select: jest.fn().mockResolvedValue(mockProduct),
+        });
+      
+        req = { params: { pid } };
+      
+        // Mock the response
+        res = {
+          set: jest.fn(),
+          status: jest.fn().mockReturnThis(),
+          send: jest.fn(),
+        };
+      
+        // Call the controller
+        await productPhotoController(req, res);
+      
+        // Assertions
+        expect(productModel.findById).toHaveBeenCalledWith(pid);
+        expect(res.set).toHaveBeenCalledWith("Content-type", "image/jpeg");
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith(mockProduct.photo.data);
+      });
+
+      test("should handle error while getting product photo", async () => {
+        const findById = jest.spyOn(productModel, "findById");
+        const pid = new mongoose.Types.ObjectId();
+    
+        // Mock the case where an error is thrown
+        const errorMessage = "Product not found";
+        const error = new Error(errorMessage);
+        findById.mockImplementation(() => {
+            throw new Error(errorMessage);
+        });
+    
+        req = { params: { pid } };
+    
+        // Mock the response
+        res = {
+            status: jest.fn().mockReturnThis(),
+            send: jest.fn(),
+        };
+    
+        // Call the controller
+        await productPhotoController(req, res);
+    
+        // Assertions
+        expect(productModel.findById).toHaveBeenCalledWith(pid);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "Erorr while getting photo",
+            error: error,  // Ensure the message is sent and not the whole error object
+        });
+    });
+    
+    
+    
+      
+      
       
       
       
