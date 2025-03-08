@@ -27,7 +27,7 @@ export default {
 
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/**", "client/src/components/**"],
+  collectCoverageFrom: ["client/src/pages/**", "client/src/components/**", "client/src/context/**"],
   coverageThreshold: {
     global: {
       lines: 90,
