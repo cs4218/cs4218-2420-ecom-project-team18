@@ -53,6 +53,7 @@ export const registerController = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).send({
       success: false,
       message: "Error in Registration",
@@ -120,10 +121,10 @@ export const forgotPasswordController = async (req, res) => {
   try {
     const { email, answer, newPassword } = req.body;
     if (!email) {
-      return res.status(400).send({ message: "Emai is required" });
+      return res.status(400).send({ message: "Email is required" });
     }
     if (!answer) {
-      return res.status(400).send({ message: "answer is required" });
+      return res.status(400).send({ message: "Answer is required" });
     }
     if (!newPassword) {
       return res.status(400).send({ message: "New Password is required" });

@@ -1,19 +1,23 @@
-import { jest } from "@jest/globals";
-import { registerController } from "./authController";
+import { expect, jest } from "@jest/globals";
+
 import userModel from "../models/userModel.js";
-import {
+import { GiHeartStake } from "react-icons/gi";
+jest.mock("../models/userModel.js");
+jest.unstable_mockModule("../helpers/authHelper.js", () => ({
+  comparePassword: jest.fn(),
+  hashPassword: jest.fn(),
+}));
+
+const { comparePassword, hashPassword } = await import(
+  "../helpers/authHelper.js"
+);
+
+const {
+  registerController,
   loginController,
   forgotPasswordController,
   testController,
-} from "./authController";
-import { comparePassword, hashPassword } from "../helpers/authHelper.js";
-
-jest.mock("../models/userModel.js");
-jest.mock("../helpers/authHelper.js", {
-  __esModule: true,
-  comparePassword: jest.fn(),
-  hashPassword: jest.fn(),
-});
+} = await import("./authController");
 
 describe("Register Controller Tests", () => {
   let req, res;
@@ -142,8 +146,9 @@ describe("Register Controller Tests", () => {
   });
 
   test("returns error if there's an unexpected server error", async () => {
+    let err = new Error("Database Error");
     userModel.findOne = jest.fn().mockImplementation(() => {
-      throw new Error("Database Error");
+      throw err;
     });
     req.body = {
       name: "Test",
@@ -153,7 +158,9 @@ describe("Register Controller Tests", () => {
       address: "Addr",
       answer: "Ans",
     };
+    console.log = jest.fn().mockImplementation();
     await registerController(req, res);
+    expect(console.log).toHaveBeenCalledWith(err);
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
@@ -186,14 +193,38 @@ describe("Login Controller Tests", () => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
-  // test("logs in successfully if credentials are correct", async () => {
-  //   userModel.findOne = jest.fn().mockResolvedValue({
-  //     password: "pass",
-  //   });
-  //   req.body = { email: "test@example.com", password: "pass" };
-  //   await loginController(req, res);
-  //   expect(res.status).toHaveBeenCalledWith(200);
-  // });
+  test("logs in successfully if credentials are correct", async () => {
+    userModel.findOne = jest.fn().mockResolvedValue({
+      password: "hashedPassword",
+    });
+    req.body = { email: "test@example.com", password: "pass" };
+    comparePassword.mockResolvedValue(true);
+    await loginController(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  test("cannot log in successfully if credentials are not correct", async () => {
+    userModel.findOne = jest.fn().mockResolvedValue({
+      password: "hashedPassword",
+    });
+    req.body = { email: "test@example.com", password: "pass" };
+    comparePassword.mockResolvedValue(false);
+    await loginController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test("handles unexpected DB error gracefully", async () => {
+    let err = new Error("DB error");
+    userModel.findOne = jest.fn().mockImplementationOnce(() => {
+      throw err;
+    });
+    req.body = { email: "test@example.com", password: "pass" };
+    console.log = jest.fn().mockImplementation();
+    await loginController(req, res);
+
+    expect(console.log).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
 });
 
 describe("Forgot Password Controller Tests", () => {
@@ -205,13 +236,14 @@ describe("Forgot Password Controller Tests", () => {
       body: {
         email: "test@example.com",
         answer: "someAnswer",
-        newPassword: "",
+        newPassword: "1234",
       },
     };
     res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
   });
 
   test("fails if newPassword is missing", async () => {
+    req.body.newPassword = "";
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
   });
@@ -220,6 +252,53 @@ describe("Forgot Password Controller Tests", () => {
     req.body.answer = "";
     await forgotPasswordController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test("fails if email is missing", async () => {
+    req.body.email = "";
+    await forgotPasswordController(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  test("fails if no user is found", async () => {
+    userModel.findOne = jest.fn().mockResolvedValue(undefined);
+    await forgotPasswordController(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  test("successfully resets", async () => {
+    req.body.newPassword = "brandNewPassword";
+    req.body.answer = "someAnswer";
+    userModel.findOne = jest.fn().mockResolvedValue({
+      email: "test@example.com",
+      answer: "someAnswer",
+      password: "oldPassword",
+    });
+    userModel.findByIdAndUpdate = jest.fn().mockResolvedValue({
+      email: "test@example.com",
+      answer: req.body.answer,
+      password: req.body.newPassword,
+    });
+    hashPassword.mockImplementation((password) => password + "hash");
+    await forgotPasswordController(req, res);
+    expect(userModel.findOne).toHaveBeenCalledWith({
+      email: "test@example.com",
+      answer: req.body.answer,
+    });
+    expect(hashPassword).toHaveBeenCalledWith("brandNewPassword");
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  test("handles unexpected DB error gracefully", async () => {
+    let err = new Error("DB error");
+    userModel.findOne = jest.fn().mockImplementationOnce(() => {
+      throw err;
+    });
+    console.log = jest.fn().mockImplementation();
+
+    await forgotPasswordController(req, res);
+    expect(console.log).toHaveBeenCalledWith(err);
+    expect(res.status).toHaveBeenCalledWith(500);
   });
 });
 
