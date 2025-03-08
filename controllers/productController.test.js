@@ -2,7 +2,8 @@ import { jest } from "@jest/globals";
 import { 
     createProductController, 
     deleteProductController,
-    updateProductController } from "./productController";
+    updateProductController,
+    getProductController } from "./productController";
 import productModel from "../models/productModel";
 import mongoose from "mongoose";
 
@@ -347,9 +348,9 @@ describe("Create Product Controller Test", () => {
   })
   });
 
-})
+});
 
-describe("Create Product Controller Test", () => {
+describe("Get Product Controller Test", () => {
     let req, res;
   
     beforeEach(() => {
@@ -377,60 +378,79 @@ describe("Create Product Controller Test", () => {
     });
 
     test("successful retrieval of all products", async () => {
-        // Mock productModel.find() to return a chainable query object
-        const find = jest.spyOn(productModel, "find");
-      
+        const find = jest.spyOn(productModel, 'find');
         const pid = new mongoose.Types.ObjectId();
       
-        // Setup the req object for retrieving all products
         req = {
           params: {},
           query: {},
         };
       
-        // Mock the full chain of methods (.populate, .select, .exec)
+        const mockProducts = [{
+          _id: pid,
+          name: "product",
+          description: "product description",
+          price: "100",
+          quantity: "10",
+          category: "123",
+          shipping: true,
+        }];
+      
         find.mockImplementation(() => ({
-          populate: jest.fn().mockReturnThis(),  // Mock populate to return the same query
-          select: jest.fn().mockReturnThis(),    // Mock select to return the same query
-          exec: jest.fn().mockResolvedValue([
-            {
-              _id: pid,
-              name: "product",
-              description: "product description",
-              price: "100",
-              quantity: "10",
-              category: "123",
-              shipping: true,
-            },
-          ]),
+          populate: jest.fn().mockReturnThis(),
+          select: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          sort: jest.fn().mockResolvedValue(mockProducts),
         }));
       
-        // Initialize res object
-        res = {
-          status: jest.fn().mockReturnThis(),
-          send: jest.fn(),
-        };
       
-        // Simulate the call to the getProductController
         await getProductController(req, res);
       
         // Assertions
         expect(productModel.find).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.send).toHaveBeenCalledWith({
-          success: true,
-          message: "Products retrieved successfully",
-          products: expect.arrayContaining([
+        expect(res.send).toHaveBeenCalledWith(
             expect.objectContaining({
-              name: "product",
-              description: "product description",
-              price: "100",
-              quantity: "10",
-              shipping: true,
-              category: "123",
-            }),
-          ]),
-        });
-      });
+              success: true,
+              counTotal: mockProducts.length,
+              message: "ALlProducts ",
+              products: expect.arrayContaining([
+                expect.objectContaining({
+                  _id: pid,
+                  name: "product",
+                  description: "product description",
+                  price: "100",
+                  quantity: "10",
+                  category: "123",
+                  shipping: true,
+                }),
+              ]),
+            })
+        );
+    });
 
-})
+    test("handles error when retrieving products", async () => {
+        // Mock productModel.find() to throw an error
+        const find = jest.spyOn(productModel, "find");
+        find.mockImplementation(() => {
+          throw new Error("Database connection failed");
+        });
+      
+        req = { params: {}, query: {} };
+      
+        await getProductController(req, res);
+      
+        // Assertions
+        expect(productModel.find).toHaveBeenCalled();
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            success: false,
+            message: "Erorr in getting products",
+            error: "Database connection failed",
+          })
+        );
+      });
+    
+
+});
