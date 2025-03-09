@@ -283,5 +283,38 @@ test("get single category model successfully", async () => {
         error: Error("Error"),
   })
   });
-
 })
+
+
+
+// ✅ Test for getting categories returns correct data
+test("Get all categories successfully", async () => {
+    const req = {}; // No request body needed
+    const res = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+    };
+
+    const mockCategories = [
+        { _id: "1", name: "Electronics", slug: "electronics" },
+        { _id: "2", name: "Clothing", slug: "clothing" },
+    ];
+    
+    categoryModel.find = jest.fn().mockResolvedValue(mockCategories);
+
+    await categoryControlller(req, res);
+
+    // ✅ Debugging
+    console.log(res.send.mock.calls);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        message: "All Categories List",
+        category: mockCategories,
+    });
+});
+
+
+
+
