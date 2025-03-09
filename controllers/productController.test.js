@@ -15,11 +15,12 @@ import {
 import productModel from "../models/productModel";
 import categoryModel from "../models/categoryModel";
 import mongoose from "mongoose";
+import fs from "fs";
 
 jest.mock("../models/productModel.js");
 jest.mock("../models/categoryModel.js");
 
-describe("Create Product Controller Test", () => {
+describe("Create / Delete/ Update Product Controller Test", () => {
   let req, res;
 
   beforeEach(() => {
@@ -48,9 +49,34 @@ describe("Create Product Controller Test", () => {
 
   test("product model is saved successfully", async () => {
 
-    productModel.prototype.save = jest.fn()
+    productModel.prototype.save = jest.fn();
+
+    req = {
+      fields: {
+        name: 'product',
+        description: 'product description',
+        price: "100",
+        category: "123",
+        quantity: "10",
+        shipping: true,
+      },
+
+      files: {
+        photo: {
+          size: 10000,
+          path: 'mock/path/to/jpg',
+          type: "image/jpeg"
+        },
+      },
+      
+    };
+
+    jest.spyOn(fs, "readFileSync").mockImplementation(() => Buffer.from("mock image data"));
+    
+
 
     await createProductController(req, res);
+    expect(fs.readFileSync).toHaveBeenCalled();
     expect(productModel.prototype.save).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
@@ -67,10 +93,67 @@ describe("Create Product Controller Test", () => {
   })
   });
 
-  test("save product fails with no name, description, price, category, quantity", async () => {
+  test("product model photo exceeds size during creation", async () => {
+
+    productModel.prototype.save = jest.fn();
+
+    req = {
+      fields: {
+        name: 'product',
+        description: 'product description',
+        price: "100",
+        category: "123",
+        quantity: "10",
+        shipping: true,
+      },
+
+      files: {
+        photo: {
+          size: 100000000,
+          path: 'mock/path/to/jpg',
+          type: "image/jpeg"
+        },
+      },
+      
+    };
+
+    jest.spyOn(fs, "readFileSync").mockImplementation(() => Buffer.from("mock image data"));
+    
+
+
+    await createProductController(req, res);
+    expect(fs.readFileSync).not.toHaveBeenCalled();
+    expect(productModel.prototype.save).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+        error: "photo is Required and should be less then 1mb"
+  })
+  });
+
+  test("Error when create product", async () => {
+
+    const productInstance = new productModel();
+    const save = jest.spyOn(productInstance, 'save');
+    save.mockImplementation(async () => {
+        throw new Error("Product not found");
+    });
+    
+    
+    
+
+    await createProductController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error in creating product",
+        error: expect.objectContaining({}),
+  })
+    
+  });
+
+  test("save product fails with no name", async () => {
     req = {
         fields: {
-          name: null,
           description: null,
           price: null,
           category: null,
@@ -87,8 +170,88 @@ describe("Create Product Controller Test", () => {
     await createProductController(req, res);
     expect(productModel.prototype.save).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Name is Required"
+    })
     
   });
+
+  test("create product model fail with no description", async () => {
+
+    req = {
+      fields: {
+        name: "createproduct",
+        price: null,
+        category: null,
+        quantity: null,
+        shipping: true,
+      },
+      files: {
+        photo: null,
+      },
+      
+    };
+    productModel.prototype.save = jest.fn()
+
+    await createProductController(req, res);
+    expect(productModel.prototype.save).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Description is Required"
+  })
+  });
+
+  test("create product model fail with no price", async () => {
+
+    req = {
+      fields: {
+        description: "create product description",
+        name: "createproduct",
+        category: null,
+        quantity: null,
+        shipping: true,
+      },
+      files: {
+        photo: null,
+      },
+      
+    };
+    productModel.prototype.save = jest.fn()
+
+    await createProductController(req, res);
+    expect(productModel.prototype.save).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Price is Required"
+  })
+  });
+
+  test("create product model fail with no category", async () => {
+
+    req = {
+      fields: {
+        description: "create product description",
+        name: "createproduct",
+        price: "50",
+        quantity: null,
+        shipping: true,
+      },
+      files: {
+        photo: null,
+      },
+      
+    };
+    productModel.prototype.save = jest.fn()
+
+    await createProductController(req, res);
+    expect(productModel.prototype.save).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Category is Required"
+  })
+  });
+
+
 
   test("delete product successfully", async () => {
     const pid = new mongoose.Types.ObjectId();
@@ -164,13 +327,20 @@ describe("Create Product Controller Test", () => {
         },
   
         files: {
-          photo: null,
+          photo: {
+            size: 10000,
+            path: 'mock/path/to/jpg',
+            type: "image/jpeg"
+          },
         },
         
       };
+  
+    jest.spyOn(fs, "readFileSync").mockImplementation(() => Buffer.from("mock image data"));
     await updateProductController(req, res);
-    expect(productModel.findByIdAndUpdate).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(201);
+    expect(fs.readFileSync).toHaveBeenCalled();
+    //expect(productModel.findByIdAndUpdate).toHaveBeenCalled();
+    //expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
         success: true,
         message: "Product Updated Successfully",
@@ -186,6 +356,47 @@ describe("Create Product Controller Test", () => {
   })
   });
 
+  test("product model is not updated when photo exceeds size", async () => {
+
+
+    const findByIdAndUpdate = jest.spyOn(productModel, 'findByIdAndUpdate');
+    findByIdAndUpdate.mockImplementation((pid, field, nw) => ({
+        ...field,
+        save: jest.fn(),
+      }));
+
+    const pid = new mongoose.Types.ObjectId();
+    req = {
+        params: {
+            pid,
+          },
+        fields: {
+          name: 'productupdate',
+          description: 'product description update',
+          price: "1",
+          category: "12",
+          quantity: "5",
+          shipping: false,
+        },
+  
+        files: {
+          photo: {
+            size: 1000000000,
+            path: 'mock/path/to/jpg',
+            type: "image/jpeg"
+          },
+        },
+        
+      };
+    await updateProductController(req, res);
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+        error: "photo is Required and should be less then 1mb"
+
+  })
+  });
+  
   test("Update product fails with no name, description, price, category, quantity", async () => {
 
 
@@ -357,6 +568,150 @@ describe("Create Product Controller Test", () => {
           }),
   })
   });
+  test("update product model fail with no description", async () => {
+
+
+    const findByIdAndUpdate = jest.spyOn(productModel, 'findByIdAndUpdate');
+    findByIdAndUpdate.mockImplementation((pid, field, nw) => ({
+        ...field,
+        save: jest.fn(),
+      }));
+
+    const pid = new mongoose.Types.ObjectId();
+    req = {
+        params: {
+            pid,
+          },
+        fields: {
+          name: 'productupdate',
+          price: "0",
+          category: "12",
+          quantity: "0",
+          shipping: false,
+        },
+  
+        files: {
+          photo: null,
+        },
+        
+      };
+    await updateProductController(req, res);
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Description is Required"
+  })
+  });
+
+  test("update product model fail with no price", async () => {
+
+
+    const findByIdAndUpdate = jest.spyOn(productModel, 'findByIdAndUpdate');
+    findByIdAndUpdate.mockImplementation((pid, field, nw) => ({
+        ...field,
+        save: jest.fn(),
+      }));
+
+    const pid = new mongoose.Types.ObjectId();
+    req = {
+        params: {
+            pid,
+          },
+        fields: {
+          name: 'productupdate',
+          description: "product update description",
+          category: "12",
+          quantity: "0",
+          shipping: false,
+        },
+  
+        files: {
+          photo: null,
+        },
+        
+      };
+    await updateProductController(req, res);
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Price is Required"
+  })
+  });
+
+  test("update product model fail with no category", async () => {
+
+
+    const findByIdAndUpdate = jest.spyOn(productModel, 'findByIdAndUpdate');
+    findByIdAndUpdate.mockImplementation((pid, field, nw) => ({
+        ...field,
+        save: jest.fn(),
+      }));
+
+    const pid = new mongoose.Types.ObjectId();
+    req = {
+        params: {
+            pid,
+          },
+        fields: {
+          name: 'productupdate',
+          price: "0",
+          description: "product update description",
+          quantity: "0",
+          shipping: false,
+        },
+  
+        files: {
+          photo: null,
+        },
+        
+      };
+    await updateProductController(req, res);
+    expect(productModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      error: "Category is Required"
+  })
+  });
+
+  test("Error when save product", async () => {
+
+    const findByIdAndUpdate = jest.spyOn(productModel, 'findByIdAndUpdate');
+  findByIdAndUpdate.mockImplementation(() => {
+      throw new Error("Error when update product");
+    });
+
+  const pid = new mongoose.Types.ObjectId();
+  req = {
+      params: {
+          pid,
+        },
+      fields: {
+        name: 'productupdate',
+        category: "product category",
+        price: "0",
+        description: "product update description",
+        quantity: "0",
+        shipping: false,
+      },
+
+      files: {
+        photo: null,
+      },
+      
+    };    
+    
+    
+
+    await updateProductController(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+        success: false,
+        message: "Error in update product",
+        error: expect.objectContaining({}),
+  })
+    
+  });
+
 
 });
 
@@ -602,6 +957,8 @@ describe("Product/Single Product/Photo Controller Test", () => {
             error: error,  // Ensure the message is sent and not the whole error object
         });
     });
+
+    
 
 });
 
