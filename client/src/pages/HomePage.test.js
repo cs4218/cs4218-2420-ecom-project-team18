@@ -97,4 +97,41 @@ describe("HomePage Tests", () => {
         fireEvent.click(screen.getByText(/reset filters/i));
         expect(reloadMock).toHaveBeenCalledTimes(1);
     });
+
+     test("logs error when API call fails", async () => {
+    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {}); // Spy on console.log
+
+    // Force axios to reject, triggering the catch block
+    axios.get.mockRejectedValueOnce(new Error("API Error"));
+
+    render(<HomePage />);
+
+    await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error)); // Ensure error is logged
+    });
+
+    consoleSpy.mockRestore(); // Restore console.log
+});
+
+test("navigates to product details page on 'More Details' button click", async () => {
+    const mockNavigate = jest.fn(); // Mock the navigate function
+    useNavigate.mockReturnValue(mockNavigate);
+
+    const testProduct = { _id: "1", name: "Laptop", price: 1200, slug: "laptop", description: "Powerful laptop." };
+    
+    axios.get.mockResolvedValueOnce({ data: { success: true, category: [] } });
+    axios.get.mockResolvedValueOnce({ data: { total: 1 } });
+    axios.get.mockResolvedValueOnce({ data: { products: [testProduct] } });
+
+    render(<HomePage />);
+
+    await waitFor(() => expect(screen.getByText("Laptop")).toBeInTheDocument());
+
+    const detailsButton = screen.getByText(/more details/i);
+    fireEvent.click(detailsButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith(`/product/laptop`);
+});
+
+
 });
