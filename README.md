@@ -1,4 +1,4 @@
-Front end CI: https://github.com/cs4218/cs4218-2420-ecom-project-team18/actions/runs/13750554855/job/38450984924
+Front end CI: https://github.com/cs4218/cs4218-2420-ecom-project-team18/actions/runs/13750554855/job/38450984924 <br/>
 Back end CI: https://github.com/cs4218/cs4218-2420-ecom-project-team18/actions/runs/13750554855/job/38450984794
 
 
