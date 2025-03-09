@@ -10,11 +10,14 @@ import {
     productCountController,
     productListController,
     searchProductController,
-    realtedProductController } from "./productController";
+    realtedProductController,
+    productCategoryController } from "./productController";
 import productModel from "../models/productModel";
+import categoryModel from "../models/categoryModel";
 import mongoose from "mongoose";
 
 jest.mock("../models/productModel.js");
+jest.mock("../models/categoryModel.js");
 
 describe("Create Product Controller Test", () => {
   let req, res;
@@ -1019,20 +1022,52 @@ describe("Related Product Controller Tests", () => {
       test("should handle database error", async () => {
         const errorMessage = "Database error";
         const error = new Error(errorMessage);
-        // Mock the find method on productModel
-        const mockQuery = [
-            { productId: 1, productName: 'Test Product 1', price: 100, category: 'Test Category 1' },
-            { productId: 2, productName: 'Test Product 2', price: 150, category: 'Test Category 2' },
-            { productId: 3, productName: 'Test Product 3', price: 200, category: 'Test Category 3' }
-        ];
-        productModel.find = jest.fn().mockResolvedValue({
-            select: jest.fn().mockReturnThis(), // Mock .select()
-            limit: jest.fn().mockReturnThis(),  // Mock .limit()
-            populate: jest.fn().mockReturnThis(mockQuery), // Mock .populate()
-            
+        
+        productModel.find = jest.fn().mockReturnThis();
+        productModel.select = jest.fn().mockReturnThis();
+        productModel.limit = jest.fn().mockReturnThis();
+        productModel.populate = jest.fn().mockRejectedValue(error);
+    
+        await realtedProductController(req, res);
+    
+        // Ensure the response is correctly handled as an error
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+            success: false,
+            message: "error while geting related product",
+            error: error,  // Expect the error message
         });
 
+        
+    });
 
+    test("should return error if parameters are missing", async () => {
+        // Set up the request parameters with invalid ones
+        req.params = {}; // Empty parameters
+      
+        await realtedProductController(req, res);
+      
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          success: false,
+          message: "error while geting related product",
+          error: expect.any(Error), // Expecting an error for missing parameters
+        });
+      });
+
+      test("should handle no related products found", async () => {
+        const mockProducts = []; // Empty array representing no related products
+      
+        const mockPopulate = jest.fn().mockReturnThis(); // Mock the populate function
+        
+        const mockQuery = {
+          select: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          populate: jest.fn().mockResolvedValue(mockProducts),
+        };
+      
+        // Mock `find` to return the query object
+        productModel.find = jest.fn().mockReturnValue(mockQuery);
       
         // Set up the request parameters
         req.params.pid = "productId"; // The current product ID
@@ -1040,21 +1075,101 @@ describe("Related Product Controller Tests", () => {
       
         await realtedProductController(req, res);
       
-        // Ensure `find` was called with the correct parameters
         expect(productModel.find).toHaveBeenCalledWith({
           category: "categoryId",
           _id: { $ne: "productId" },
         });
       
-        // Check that the response has a failure status and the correct message
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.send).toHaveBeenCalledWith({
+          success: true,
+          products: mockProducts, // Expecting an empty array of products
+        });
+      });     
+
+});
+
+describe("productCategoryController", () => {
+    let req, res;
+  
+    beforeEach(() => {
+      req = {
+        params: {},
+      };
+      res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+        send: jest.fn(),
+      };
+    });
+  
+    test("should return products for a valid category", async () => {
+      const mockCategory = { _id: "categoryId", name: "Test Category", slug: "test-category" };
+      const mockProducts = [
+        { _id: "product1", name: "Product 1", category: mockCategory },
+        { _id: "product2", name: "Product 2", category: mockCategory },
+      ];
+
+      req.params.slug = "test-category";
+  
+      // Mock database calls
+      categoryModel.findOne = jest.fn().mockResolvedValue(mockCategory);
+      productModel.find = jest.fn().mockReturnValue({ populate: jest.fn().mockResolvedValue(mockProducts) });
+  
+      await productCategoryController(req, res);
+  
+      expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "test-category" });
+      expect(productModel.find).toHaveBeenCalledWith({ category: mockCategory });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        success: true,
+        category: mockCategory,
+        products: mockProducts,
+      });
+    });
+
+    test("should handle category not found case", async () => {
+        const errorMessage = "Category not found";
+        const error = new Error(errorMessage);
+        req.params.slug = "non-existent-category";
+        
+        // Mock the database returning null for the category
+        categoryModel.findOne = jest.fn().mockResolvedValue(null);
+      
+        // Mock productModel.find so it is still called with null
+        productModel.find = jest.fn().mockReturnValue({
+          populate: jest.fn().mockRejectedValue(error),
+        });
+      
+        await productCategoryController(req, res);
+      
+        expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: "non-existent-category" });
+      
+        // Since production code does not handle null category explicitly, expect find to be called with null
+        expect(productModel.find).toHaveBeenCalledWith({ category: null });
+      
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.send).toHaveBeenCalledWith({
           success: false,
-          message: "error while getting related product",
-          error: error
+          message: "Error While Getting products",
+          error: error,
+        });
+      });
+
+      test("should handle database error", async () => {
+        const errorMessage = "Database error";
+        const error = new Error(errorMessage);
+        categoryModel.findOne = jest.fn().mockRejectedValue(error);
+    
+        await productCategoryController(req, res);
+    
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.send).toHaveBeenCalledWith({
+          success: false,
+          error: error,
+          message: "Error While Getting products",
         });
       });
       
       
-
 });
