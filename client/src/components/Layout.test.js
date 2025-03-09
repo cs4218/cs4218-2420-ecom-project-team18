@@ -2,8 +2,7 @@ import React from 'react';
 import { render, screen, } from '@testing-library/react';
 import Layout from './Layout';
 import '@testing-library/jest-dom';
-import { waitFor, act } from '@testing-library/react';
-import toast from 'react-hot-toast';
+import { waitFor } from '@testing-library/react';
 
 
 // Mocking Header and Footer to simplify the test
