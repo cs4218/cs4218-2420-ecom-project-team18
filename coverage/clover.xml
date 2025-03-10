@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1741539098113" clover="3.2.0">
-  <project timestamp="1741539098113" name="All files">
+<coverage generated="1741607570787" clover="3.2.0">
+  <project timestamp="1741607570787" name="All files">
     <metrics statements="268" coveredstatements="249" conditionals="86" coveredconditionals="79" methods="31" coveredmethods="26" elements="385" coveredelements="354" complexity="0" loc="268" ncloc="268" packages="2" files="7" classes="7"/>
     <package name="controllers">
       <metrics statements="262" coveredstatements="243" conditionals="86" coveredconditionals="79" methods="30" coveredmethods="25"/>
@@ -100,45 +100,45 @@
       </file>
       <file name="categoryController.js" path="E:\SynologyDrive\NUS\CS4218\project\cs4218-2420-ecom-project-team18\controllers\categoryController.js">
         <metrics statements="39" coveredstatements="39" conditionals="4" coveredconditionals="4" methods="5" coveredmethods="5"/>
-        <line num="3" count="1" type="stmt"/>
-        <line num="4" count="4" type="stmt"/>
-        <line num="5" count="4" type="stmt"/>
-        <line num="6" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="7" count="1" type="stmt"/>
-        <line num="9" count="3" type="stmt"/>
-        <line num="10" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="11" count="1" type="stmt"/>
-        <line num="16" count="1" type="stmt"/>
-        <line num="20" count="1" type="stmt"/>
-        <line num="26" count="1" type="stmt"/>
-        <line num="27" count="1" type="stmt"/>
-        <line num="36" count="1" type="stmt"/>
-        <line num="37" count="2" type="stmt"/>
-        <line num="38" count="2" type="stmt"/>
-        <line num="39" count="2" type="stmt"/>
-        <line num="40" count="2" type="stmt"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="52" count="1" type="stmt"/>
-        <line num="53" count="1" type="stmt"/>
-        <line num="62" count="1" type="stmt"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="4" count="8" type="stmt"/>
+        <line num="5" count="8" type="stmt"/>
+        <line num="6" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="9" count="6" type="stmt"/>
+        <line num="10" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="11" count="2" type="stmt"/>
+        <line num="16" count="2" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="36" count="2" type="stmt"/>
+        <line num="37" count="4" type="stmt"/>
+        <line num="38" count="4" type="stmt"/>
+        <line num="39" count="4" type="stmt"/>
+        <line num="40" count="4" type="stmt"/>
+        <line num="45" count="2" type="stmt"/>
+        <line num="52" count="2" type="stmt"/>
+        <line num="53" count="2" type="stmt"/>
+        <line num="62" count="2" type="stmt"/>
         <line num="63" count="3" type="stmt"/>
         <line num="64" count="3" type="stmt"/>
         <line num="65" count="2" type="stmt"/>
         <line num="71" count="1" type="stmt"/>
         <line num="72" count="1" type="stmt"/>
-        <line num="81" count="1" type="stmt"/>
+        <line num="81" count="2" type="stmt"/>
         <line num="82" count="2" type="stmt"/>
         <line num="83" count="2" type="stmt"/>
         <line num="84" count="1" type="stmt"/>
         <line num="90" count="1" type="stmt"/>
         <line num="91" count="1" type="stmt"/>
-        <line num="100" count="1" type="stmt"/>
-        <line num="101" count="2" type="stmt"/>
-        <line num="102" count="2" type="stmt"/>
-        <line num="103" count="2" type="stmt"/>
-        <line num="104" count="1" type="stmt"/>
-        <line num="109" count="1" type="stmt"/>
-        <line num="110" count="1" type="stmt"/>
+        <line num="100" count="2" type="stmt"/>
+        <line num="101" count="4" type="stmt"/>
+        <line num="102" count="4" type="stmt"/>
+        <line num="103" count="4" type="stmt"/>
+        <line num="104" count="2" type="stmt"/>
+        <line num="109" count="2" type="stmt"/>
+        <line num="110" count="2" type="stmt"/>
       </file>
       <file name="productController.js" path="E:\SynologyDrive\NUS\CS4218\project\cs4218-2420-ecom-project-team18\controllers\productController.js">
         <metrics statements="132" coveredstatements="115" conditionals="38" coveredconditionals="32" methods="17" coveredmethods="12"/>
@@ -280,7 +280,7 @@
       <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
       <file name="categoryModel.js" path="E:\SynologyDrive\NUS\CS4218\project\cs4218-2420-ecom-project-team18\models\categoryModel.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="3" count="2" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
       </file>
       <file name="orderModel.js" path="E:\SynologyDrive\NUS\CS4218\project\cs4218-2420-ecom-project-team18\models\orderModel.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
@@ -294,7 +294,7 @@
       </file>
       <file name="userModel.js" path="E:\SynologyDrive\NUS\CS4218\project\cs4218-2420-ecom-project-team18\models\userModel.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="3" count="2" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
       </file>
     </package>
   </project>
