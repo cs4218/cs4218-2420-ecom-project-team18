@@ -258,4 +258,53 @@ describe("Products Pages and Update Product integration", () => {
       });
 
   })
+
+  it("Should navigate to Update Product page when product is clicked and delete successfully", async () => {
+    window.prompt = jest.fn().mockReturnValue(true);
+    axios.delete.mockResolvedValue({
+      data: {
+        success: true,
+        message: "Product Deleted Successfully",
+      },
+    }); 
+    const {getByDisplayValue, getByRole, getByText} = render(
+      <MemoryRouter initialEntries={["/dashboard/admin/products"]}>
+        <Routes>
+          <Route path="/dashboard/admin/products" element={<Products />} />
+          <Route path="/dashboard/admin/product/:slug" element={<UpdateProduct />} />
+        </Routes>
+      </MemoryRouter>
+    );    
+    await waitFor(() => {
+    expect(getByText(/productname1/i)).toBeInTheDocument();
+    expect(getByText(/product1 description/i)).toBeInTheDocument();
+    expect(getByText(/productname2/i)).toBeInTheDocument();
+    expect(getByText(/product2 description/i)).toBeInTheDocument();
+  });
+
+  fireEvent.click(getByText(/productname1/i));
+
+  await waitFor(() => {
+    expect(getByDisplayValue('productname1')).toBeInTheDocument();
+  });
+
+  expect(getByRole("button", { name: /update product/i })).toBeInTheDocument();
+  expect(getByDisplayValue('200')).toBeInTheDocument();
+  expect(getByText('Yes')).toBeInTheDocument();
+  expect(getByDisplayValue(/54.99/i)).toBeInTheDocument();
+  expect(getByRole("button", { name: /delete product/i })).toBeInTheDocument();
+
+   fireEvent.click(getByRole("button", { name: /delete product/i }));
+   await waitFor(() => {
+           expect(window.prompt).toHaveBeenCalledWith(
+             "Are You Sure want to delete this product ? "
+           );
+    });
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith("Product Deleted Successfully");
+        expect(getByText(/productname2/i)).toBeInTheDocument(); // Ensure navigate back to products page
+        expect(getByText(/product2 description/i)).toBeInTheDocument();
+      });
+
+  })
 })
