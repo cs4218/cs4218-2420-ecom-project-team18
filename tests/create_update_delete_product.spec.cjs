@@ -1,0 +1,91 @@
+// @ts-check
+const { test, expect } = require('@playwright/test');
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('/', {waitUntil: "domcontentloaded"});
+  await page.getByRole('link', { name: 'Login' }).click();
+  await page.getByRole('textbox', { name: 'Enter Your Email' }).click();
+  await page.getByRole('textbox', { name: 'Enter Your Email' }).fill('admin@admin.com');
+  await page.getByRole('textbox', { name: 'Enter Your Email' }).press('Tab');
+  await page.getByRole('textbox', { name: 'Enter Your Password' }).fill('admin');
+  await page.getByRole('button', { name: 'LOGIN' }).click();
+});
+
+test.afterEach(async ({ page }) => {
+    await page.getByRole('button', { name: 'MyAdmin' }).click();
+    await page.getByRole('link', { name: 'Logout' }).click();
+})
+
+test.describe('Product Admin page', () => {
+  test('should allow me to create product', async ({ page }) => {
+    await page.getByRole('button', { name: 'MyAdmin' }).click();
+    await page.getByRole('link', { name: 'Dashboard' }).click();
+    await page.getByRole('link', { name: 'Create Product' }).click();
+    await page.locator('#rc_select_0').click();
+    await page.getByTitle('h', { exact: true }).locator('div').click();
+    await page.getByText('Upload Photo').click();
+    await page.getByRole('textbox', { name: 'write a name' }).click();
+    await page.getByRole('textbox', { name: 'write a name' }).fill('product-test');
+    await page.getByRole('textbox', { name: 'write a name' }).press('Tab');
+    await page.getByRole('textbox', { name: 'write a description' }).fill('product test description');
+    await page.getByPlaceholder('write a Price').click();
+    await page.getByPlaceholder('write a Price').fill('10');
+    await page.getByPlaceholder('write a quantity').click();
+    await page.getByPlaceholder('write a quantity').fill('20');
+    await page.locator('#rc_select_1').click();
+    await page.getByText('Yes').click();
+    await page.getByRole('button', { name: 'CREATE PRODUCT' }).click();
+    await expect(page.getByRole('main')).toContainText('product-test');
+    await expect(page.getByRole('main')).toContainText('product test description');
+    await expect(page.locator('h1')).toContainText('All Products List');
+
+  });
+
+  test('should allow me to update product', async ({ page }) => {
+    await page.getByRole('button', { name: 'MyAdmin' }).click();
+    await page.getByRole('link', { name: 'Dashboard' }).click();
+    await page.getByRole('link', { name: 'Products' }).click();
+    await page.getByRole('link', { name: 'product-test' }).click();
+    await page.getByTestId('selectCategory').getByTitle('h').click();
+    await page.getByTitle('?').locator('div').click();
+    await page.getByRole('textbox', { name: 'write a name' }).click();
+    await page.getByRole('textbox', { name: 'write a name' }).fill('product-test-update');
+    await page.getByRole('textbox', { name: 'write a description' }).click();
+    await page.getByRole('textbox', { name: 'write a description' }).fill('product test description-update');
+    await page.getByPlaceholder('write a Price').click();
+    await page.getByPlaceholder('write a Price').fill('1');
+    await page.getByPlaceholder('write a quantity').click();
+    await page.getByPlaceholder('write a quantity').fill('2');
+    await page.getByText('Yes').click();
+    await page.getByText('No').click();
+    await page.getByRole('button', { name: 'UPDATE PRODUCT' }).click();
+    await expect(page.getByRole('main')).toContainText('product-test-update');
+    await expect(page.getByRole('main')).toContainText('product test description-update');
+    await expect(page.locator('h1')).toContainText('All Products List');
+    await page.getByRole('link', { name: 'product-test-update product-' }).click();
+    await expect(page.getByTestId('selectCategory').locator('div')).toContainText('?');
+    await expect(page.getByPlaceholder('write a description')).toContainText('product test description-update');
+    await expect(page.getByRole('textbox', { name: 'write a name' })).toBeVisible();
+    await expect(page.getByPlaceholder('write a Price')).toBeVisible();
+    await expect(page.getByPlaceholder('write a quantity')).toBeVisible();
+    await expect(page.getByTestId('selectShipping').locator('div')).toContainText('No');
+
+  });
+
+  test('should allow me to delete product', async ({ page }) => {
+    await page.getByRole('button', { name: 'MyAdmin' }).click();
+    await page.getByRole('link', { name: 'Dashboard' }).click();
+    await page.getByRole('link', { name: 'Products' }).click();
+    await page.getByRole('link', { name: 'product-test-update' }).click();
+    await expect(page.getByRole('main')).toContainText('product test description-update');
+    await page.getByRole('button', { name: 'DELETE PRODUCT' }).click();
+    page.once('dialog', dialog => {
+      console.log(`Dialog message: ${dialog.message()}`);
+      dialog.accept('Yes'); 
+    });
+    await page.getByRole('button', { name: 'DELETE PRODUCT' }).click();
+    await expect(page.getByRole('main')).not.toContainText('product-test-update');
+    await expect(page.getByRole('main')).not.toContainText('product test description-update');
+
+  });
+})
