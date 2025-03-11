@@ -22,13 +22,13 @@ test.describe('Category Admin page', () => {
     await expect(page.getByText('new category is created')).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Enter new category' })).toHaveValue('new category');
     await expect(page.locator('tbody')).toContainText('new category');
-    await page.getByRole('button', { name: 'Edit' }).nth(3).click();
+    await page.getByRole('button', { name: 'Edit' }).nth(2).click();
     await page.getByRole('dialog').getByRole('textbox', { name: 'Enter new category' }).click();
     await page.getByRole('dialog').getByRole('textbox', { name: 'Enter new category' }).fill('new category updated');
     await page.getByRole('dialog').getByRole('button', { name: 'Submit' }).click();
     //await expect(page.locator('tbody')).toContainText('new category updated');
     await expect(page.getByText('new category updated is updated')).toBeVisible();
-    await page.getByRole('button', { name: 'Delete' }).nth(3).click();
+    await page.getByRole('button', { name: 'Delete' }).nth(2).click();
     await expect(page.getByText('category is deleted')).toBeVisible();
 
   });
