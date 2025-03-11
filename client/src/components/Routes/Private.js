@@ -1,9 +1,7 @@
-import React from 'react';
-import { useState,useEffect } from "react";
+import { useState,useEffect, React } from "react";
 import { useAuth } from "../../context/auth";
 import { Outlet } from "react-router-dom";
 import axios from 'axios';
-//import { set } from "mongoose";
 import Spinner from "../Spinner";
 
 export default function PrivateRoute(){
