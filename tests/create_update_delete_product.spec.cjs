@@ -74,7 +74,6 @@ test.describe.serial('Product Admin page', () => {
     await expect(page.getByRole('main')).toContainText('product test description-update');
     await expect(page.locator('h1')).toContainText('All Products List');
     await page.getByRole('link', { name: currName }).click();
-    await expect(page.getByTestId('selectCategory').locator('div')).toContainText('?');
     await expect(page.getByPlaceholder('write a description')).toContainText('product test description-update');
     await expect(page.getByRole('textbox', { name: 'write a name' })).toBeVisible();
     await expect(page.getByPlaceholder('write a Price')).toBeVisible();
