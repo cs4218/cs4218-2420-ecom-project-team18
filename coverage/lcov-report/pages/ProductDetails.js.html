@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/22</span>
+                <span class='fraction'>0/29</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/21</span>
+                <span class='fraction'>0/28</span>
             </div>
         
             
@@ -187,12 +187,30 @@
 <a name='L122'></a><a href='#L122'>122</a>
 <a name='L123'></a><a href='#L123'>123</a>
 <a name='L124'></a><a href='#L124'>124</a>
-<a name='L125'></a><a href='#L125'>125</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -254,6 +272,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -291,12 +321,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -316,12 +346,15 @@ import Layout from "./../components/Layout";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/ProductDetailsStyles.css";
+import { useCart } from "../context/cart";
+import toast from "react-hot-toast";
 &nbsp;
 const ProductDetails = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
   const params = <span class="cstat-no" title="statement not covered" >useParams();</span>
   const navigate = <span class="cstat-no" title="statement not covered" >useNavigate();</span>
   const [product, setProduct] = <span class="cstat-no" title="statement not covered" >useState({});</span>
   const [relatedProducts, setRelatedProducts] = <span class="cstat-no" title="statement not covered" >useState([]);</span>
+  const [cart, setCart] = <span class="cstat-no" title="statement not covered" >useCart();</span>
 &nbsp;
   //initalp details
 <span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
@@ -375,7 +408,19 @@ const ProductDetails = <span class="cstat-no" title="statement not covered" ><sp
             })}
           &lt;/h6&gt;
           &lt;h6&gt;Category : {product?.category?.name}&lt;/h6&gt;
-          &lt;button class="btn btn-secondary ms-1"&gt;ADD TO CART&lt;/button&gt;
+          &lt;button
+                  className="btn btn-dark ms-1"
+                  onClick={<span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >                    setCart([...cart, product]);</span>
+<span class="cstat-no" title="statement not covered" >                    localStorage.setItem(</span>
+                      "cart",
+                      JSON.stringify([...cart, product])
+                    );
+<span class="cstat-no" title="statement not covered" >                    toast.success("Item Added to cart");</span>
+                  }}
+                &gt;
+                  ADD TO CART
+                &lt;/button&gt; 
         &lt;/div&gt;
       &lt;/div&gt;
       &lt;hr /&gt;
@@ -412,19 +457,19 @@ const ProductDetails = <span class="cstat-no" title="statement not covered" ><sp
                   &gt;
                     More Details
                   &lt;/button&gt;
-                  {/* &lt;button
+                  &lt;button
                   className="btn btn-dark ms-1"
-                  onClick={() =&gt; {
-                    setCart([...cart, p]);
-                    localStorage.setItem(
+                  onClick={<span class="fstat-no" title="function not covered" >()</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >                    setCart([...cart, p]);</span>
+<span class="cstat-no" title="statement not covered" >                    localStorage.setItem(</span>
                       "cart",
                       JSON.stringify([...cart, p])
                     );
-                    toast.success("Item Added to cart");
+<span class="cstat-no" title="statement not covered" >                    toast.success("Item Added to cart");</span>
                   }}
                 &gt;
                   ADD TO CART
-                &lt;/button&gt; */}
+                &lt;/button&gt; 
                 &lt;/div&gt;
               &lt;/div&gt;
             &lt;/div&gt;
@@ -442,7 +487,7 @@ export default ProductDetails;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-03-11T05:26:51.034Z
+                at 2025-03-13T06:27:31.111Z
             </div>
         <script src="../prettify.js"></script>
         <script>
