@@ -30,7 +30,6 @@ const UpdateProduct = () => {
       setId(data.product._id);
       setDescription(data.product.description);
       setPrice(data.product.price);
-      setPrice(data.product.price);
       setQuantity(data.product.quantity);
       setShipping(data.product.shipping);
       setCategory(data.product.category._id);
@@ -73,6 +72,7 @@ const UpdateProduct = () => {
       productData.append("quantity", quantity);
       photo && productData.append("photo", photo);
       productData.append("category", category);
+      productData.append("shipping", shipping);
       const { data } = await axios.put(
         `/api/v1/product/update-product/${id}`,
         productData
@@ -116,7 +116,7 @@ const UpdateProduct = () => {
             <h1>Update Product</h1>
             <div className="m-1 w-75">
               <Select
-                bordered={false}
+                variant={false}
                 placeholder="Select a category"
                 size="large"
                 showSearch
@@ -205,15 +205,15 @@ const UpdateProduct = () => {
               </div>
               <div className="mb-3">
                 <Select
-                  bordered={false}
+                  variant={false}
                   placeholder="Select Shipping "
                   size="large"
                   showSearch
                   className="form-select mb-3"
                   onChange={(value) => {
-                    setShipping(value);
+                    setShipping(value === "1");
                   }}
-                  value={shipping ? "yes" : "No"}
+                  value={shipping ? "1" : "0"}
                   data-testid="selectShipping"
                 >
                   <Option value="0">No</Option>

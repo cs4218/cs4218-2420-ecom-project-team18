@@ -22,7 +22,7 @@ export default {
   // only run these tests
   testMatch: ["<rootDir>/client/**/*.test.js"],
 
-  //testMatch: ["<rootDir>/client/src/pages/user/Dashboard.test.js"],
+  //testMatch: ["<rootDir>/client/src/pages/admin/Products_Update.integration.test.js"],
   
 
   // jest code coverage
