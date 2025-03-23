@@ -489,7 +489,7 @@ describe("Order Controllers", () => {
       expect(res.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
-          message: "Error WHile Geting Orders",
+          message: "Error While Getting Orders",
         })
       );
     });
@@ -524,7 +524,7 @@ describe("Order Controllers", () => {
       expect(res.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
-          message: "Error WHile Geting Orders",
+          message: "Error While Getting Orders",
         })
       );
     });
@@ -560,7 +560,7 @@ describe("Order Controllers", () => {
       expect(res.send).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
-          message: "Error While Updateing Order",
+          message: "Error While Updating Order",
         })
       );
     });
