@@ -261,8 +261,8 @@ describe("Profile and Order Controller Integration Tests", () => {
       },
     });
 
-    if (!mongoose.models.Product) {
-      mongoose.model("Product", productSchema);
+    if (!mongoose.models.Products) {
+      mongoose.model("Products", productSchema);
     }
   });
 
@@ -288,7 +288,7 @@ describe("Profile and Order Controller Integration Tests", () => {
 
     adminToken = jwt.sign({ _id: "admin123" }, process.env.JWT_SECRET);
 
-    const Product = mongoose.model("Product");
+    const Product = mongoose.model("Products");
     const product = await Product.create({ name: "Test Product", price: 99 });
 
     const order = await orderModel.create({
