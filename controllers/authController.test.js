@@ -116,7 +116,7 @@ describe("Register Controller Tests", () => {
       answer: "Ans",
     };
     await registerController(req, res);
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledWith(409);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: "Already Register please login",
@@ -217,7 +217,7 @@ describe("Login Controller Tests", () => {
     req.body = { email: "test@example.com", password: "pass" };
     comparePassword.mockResolvedValue(false);
     await loginController(req, res);
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   test("handles unexpected DB error gracefully", async () => {
@@ -438,10 +438,9 @@ describe("Order Controllers", () => {
     };
 
     orderModel.find = jest.fn().mockReturnValue({
-      populate: jest.fn().mockReturnThis(), 
+      populate: jest.fn().mockReturnThis(),
       populate: jest.fn().mockReturnThis(),
     });
-    
 
     orderModel.findByIdAndUpdate = jest.fn().mockResolvedValue({
       _id: "order123",
@@ -452,30 +451,29 @@ describe("Order Controllers", () => {
   // Test getOrdersController
   describe("getOrdersController", () => {
     test("Successfully retrieves user orders", async () => {
-      const mockPopulate = jest.fn(); 
-    
+      const mockPopulate = jest.fn();
+
       mockPopulate.mockImplementation((arg1, arg2) => {
         if (arg1 === "products" && arg2 === "-photo") {
-          return mockQuery; 
+          return mockQuery;
         }
         if (arg1 === "buyer" && arg2 === "name") {
-          return orders; 
+          return orders;
         }
       });
-    
+
       const mockQuery = {
-        populate: mockPopulate, 
+        populate: mockPopulate,
       };
-    
+
       orderModel.find.mockReturnValue(mockQuery);
       await getOrdersController(req, res);
-    
+
       expect(orderModel.find).toHaveBeenCalledWith({ buyer: "user123" });
       expect(mockPopulate).toHaveBeenNthCalledWith(1, "products", "-photo");
       expect(mockPopulate).toHaveBeenNthCalledWith(2, "buyer", "name");
       expect(res.json).toHaveBeenCalledWith(orders);
     });
-    
 
     test("Handles errors properly", async () => {
       let err = new Error("Database error");
@@ -489,7 +487,10 @@ describe("Order Controllers", () => {
       expect(console.log).toHaveBeenCalledWith(err);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith(
-        expect.objectContaining({ success: false, message: "Error WHile Geting Orders" })
+        expect.objectContaining({
+          success: false,
+          message: "Error WHile Geting Orders",
+        })
       );
     });
   });
@@ -521,7 +522,10 @@ describe("Order Controllers", () => {
       expect(console.log).toHaveBeenCalledWith(err);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith(
-        expect.objectContaining({ success: false, message: "Error WHile Geting Orders" })
+        expect.objectContaining({
+          success: false,
+          message: "Error WHile Geting Orders",
+        })
       );
     });
   });
@@ -536,7 +540,10 @@ describe("Order Controllers", () => {
         { status: "Shipped" },
         { new: true }
       );
-      expect(res.json).toHaveBeenCalledWith({ _id: "order123", status: "Shipped" });
+      expect(res.json).toHaveBeenCalledWith({
+        _id: "order123",
+        status: "Shipped",
+      });
     });
 
     test("Handles errors properly", async () => {
@@ -551,7 +558,10 @@ describe("Order Controllers", () => {
       expect(console.log).toHaveBeenCalledWith(err);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith(
-        expect.objectContaining({ success: false, message: "Error While Updateing Order" })
+        expect.objectContaining({
+          success: false,
+          message: "Error While Updateing Order",
+        })
       );
     });
   });
